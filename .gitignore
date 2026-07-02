@@ -1,4 +1,9 @@
 #Archivos ignorados por git
 .env
 .devcontainer
-__pycache__
+__pycache__.env
+.vscode/
+__pycache_-/
+__pycache_-/*
+./__pycache_-/*
+__pycache__/

@@ -4,6 +4,9 @@ import DenseRetriever as DR
 import ast
 queryHistory = []
 
+import warnings
+warnings.filterwarnings("ignore", message=".*torch.*class.*")
+
 
 GENRES_IMDB = {
     28: "Action",

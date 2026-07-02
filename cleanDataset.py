@@ -9,7 +9,7 @@ def main(input_path, output_path):
     # Concatenate chunks into a single DataFrame
     df_peliculas = pd.concat(chunks, ignore_index=True)
 
-    columnas = ["title", "release_date", "popularity", "original_language", "overview", "genre_ids", "adult"]
+    columnas = ["title", "release_date", "popularity", "original_language", "overview", "genre_ids", "adult", "poster_path"]
     df_peliculas = df_peliculas[columnas]
 
     # Remove duplicate rows based on all columns
@@ -21,10 +21,7 @@ def main(input_path, output_path):
     # Reset the index after removing rows
     df_peliculas.reset_index(drop=True, inplace=True)
     
-    # Add a new column for the poster image path
-    df_peliculas['pathPoster'] = df_peliculas.apply(
-        lambda row: f"./posters/{row['title'].replace(' ', '_')}_{row['release_date'].split('-')[0]}.jpg", axis=1
-    )
+  
 
     print(df_peliculas.head())
 
