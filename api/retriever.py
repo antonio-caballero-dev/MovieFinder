@@ -1,12 +1,10 @@
+import os
 import numpy as np
 import pandas as pd
 import ast
-import time
-from pathlib import Path
-from optimum.onnxruntime import ORTModelForFeatureExtraction
 from transformers import AutoTokenizer
 from sklearn.metrics.pairwise import cosine_similarity
-import torch
+import onnxruntime as ort
 
 GENRES = {
     28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
@@ -21,16 +19,23 @@ class OnnxDenseRetriever:
         self.df = pd.read_csv(csv_path)
         self.embeddings = np.load(embeddings_path)
         self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
-        self.model = ORTModelForFeatureExtraction.from_pretrained(model_dir)
+        self.session = ort.InferenceSession(os.path.join(model_dir, "model.onnx"))
 
     def _encode(self, text: str) -> np.ndarray:
-        inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True)
-        with torch.no_grad():
-            outputs = self.model(**inputs)
-        mask = inputs["attention_mask"].unsqueeze(-1).expand(outputs.last_hidden_state.size()).float()
-        emb = torch.sum(outputs.last_hidden_state * mask, 1) / torch.clamp(mask.sum(1), min=1e-9)
-        emb = torch.nn.functional.normalize(emb, p=2, dim=1)
-        return emb.numpy()
+        inputs = self.tokenizer(text, return_tensors="np", padding=True, truncation=True)
+        onnx_inputs = {k: v for k, v in inputs.items() if k in {i.name for i in self.session.get_inputs()}}
+        outputs = self.session.run(None, onnx_inputs)
+        last_hidden_state = outputs[0]  # (batch, seq, hidden)
+
+        attention_mask = inputs["attention_mask"]
+        mask = np.expand_dims(attention_mask, -1).astype(np.float32)
+        summed = np.sum(last_hidden_state * mask, axis=1)
+        counts = np.clip(mask.sum(axis=1), a_min=1e-9, a_max=None)
+        emb = summed / counts
+
+        norm = np.linalg.norm(emb, axis=1, keepdims=True)
+        emb = emb / np.clip(norm, a_min=1e-9, a_max=None)
+        return emb
 
     def search(self, query: str, top_k: int = 5, genre_id: int | None = None,
                start_year: int | None = None, end_year: int | None = None) -> list[dict]:
