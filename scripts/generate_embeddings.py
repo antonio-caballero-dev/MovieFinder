@@ -8,7 +8,11 @@ model_path = "./model/all-MiniLM-L6-v2"
 model = ORTModelForFeatureExtraction.from_pretrained(model_path)
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-df = pd.read_csv("./data/peliculas_es_CLEAN.csv")
+model_path = "model/all-MiniLM-L6-v2"
+csv_path = "data/peliculas_CLEAN.csv"
+output_path = "data/embeddings.npy"
+
+df = pd.read_csv(csv_path)
 texts = (df["title"] + " " + df["overview"]).tolist()
 
 def encode_batch(texts, batch_size=64):
@@ -31,5 +35,5 @@ def encode_batch(texts, batch_size=64):
 
 print("Generando embeddings...")
 embeddings = encode_batch(texts)
-np.save("./data/embeddings.npy", embeddings)
+np.save(output_path, embeddings)
 print(f"✅ Guardado: {embeddings.shape}")

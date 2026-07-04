@@ -9,7 +9,7 @@ def main(input_path, output_path):
     # Concatenate chunks into a single DataFrame
     df_peliculas = pd.concat(chunks, ignore_index=True)
 
-    columnas = ["title", "release_date", "popularity", "original_language", "overview", "genre_ids", "adult", "poster_path"]
+    columnas = ["id","title", "release_date", "popularity", "original_language", "overview", "genre_ids", "adult", "poster_path"]
     df_peliculas = df_peliculas[columnas]
 
     # Remove duplicate rows based on all columns

@@ -63,15 +63,8 @@ MAX_PELICULAS = 10000  # Número total de películas a descargar
 PELICULAS_POR_PAGINA = 20  # TMDB devuelve 20 películas por página
 paginas_a_descargar = (MAX_PELICULAS // PELICULAS_POR_PAGINA) + 1
 
-# Argument parser configuration
-parser = argparse.ArgumentParser(description="Descargar películas populares de TMDB y guardarlas en un archivo CSV.")
-parser.add_argument('--dest', type=str, required=True, help="Ruta para guardar el archivo CSV de películas populares.")
-args = parser.parse_args()
 
-PATH_SAVE = args.dest
-
-# Ensure the directory exists
-os.makedirs(os.path.dirname(PATH_SAVE), exist_ok=True)
+PATH_SAVE = "peliculas.csv"
 
 import concurrent.futures
 
@@ -100,7 +93,7 @@ if __name__=="__main__":
         
     
     # Obtener las películas más populares
-    peliculas = obtener_peliculas(MAX_PELICULAS)
+    peliculas = obtener_peliculas(MAX_PELICULAS, "en-EN")
 
     # Crear un DataFrame y guardar en un archivo CSV
     df_peliculas = pd.DataFrame(peliculas)
