@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: moviefinder-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
